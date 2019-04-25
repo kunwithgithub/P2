@@ -36,6 +36,18 @@ int queue_destroy(queue_t queue)
     return -1;
   }
 
+  struct node *currentNode = queue->front;
+
+  while(queue->front != NULL)
+  {
+    queue->front = queue->front->next;
+    free(currentNode);
+  }
+  
+  queue->front = NULL;
+  queue->back = NULL;
+  queue->length = 0;
+  return 0;
 }
 
 int queue_enqueue(queue_t queue, void *data)
@@ -51,10 +63,12 @@ int queue_enqueue(queue_t queue, void *data)
   if(queue->length == 0){
       queue->front = newNode;
       queue->back = newNode;
+      queue->length++;
       return 0;
   }
   queue->back->next = newNode;
   queue->back = newNode;
+  queue->length++;
 	
   return 0;
 }
@@ -82,41 +96,62 @@ int queue_delete(queue_t queue, void *data)
     return -1;
   }
 	struct node *head = queue->front;
+  
   if(head->data == data){
     queue->front = head->next;
     free(head);
     head = NULL;
+    queue->length--;
+    return 0;
+    
   }
-	for(int i=0;i<length;i++){
+	
+  for(int i=1;i<length;i++){
 		if(head->next->data == data){
       struct node *willbedelete = head->next;
       head->next = head->next->next;
       free(willbedelete);
       willbedelete = NULL;
+      queue->length--; 
       return 0;
     }
 
 		
     head = head->next;
+    
   }
+
+   
 	return -1;
+
 }
 
 int queue_iterate(queue_t queue, queue_func_t func, void *arg, void **data)
 {
 	/* TODO Phase 1 */
 	struct node *head=queue->front;
-	while(head!=NULL){
-		int test=func(head->data,arg);
-		if(test==-1){
+  if(queue == NULL || func == NULL)
+  {
+    return -1;
+  }
+	//while(head!=NULL){
+    while(head != NULL)
+    {
+		  int test=func(head->data,arg);
+		
+    if(test==1){
 			*data = head->data;
-			return -1;
+			return 0;
 		}
-		if(head->next!=NULL){
-			head=head->next;
-		}
+		
+    //if(head->next!=NULL){
+		//	head=head->next;
+		//}
+    head = head ->next;
 	}
-	return queue->length;
+	
+  return 0;
+
 	
 }
 
