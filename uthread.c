@@ -31,9 +31,13 @@ struct Thread{
 void uthread_yield(void)
 {
 	/* TODO Phase 2 */
-  void **data;
-  queue_dequeue(running,data);
-  queue_enqueue(ready,data);
+  struct Thread *from;
+  struct Thread *to;
+  queue_dequeue(running,(void *)from);
+  queue_enqueue(ready,to);
+  uthread_ctx_switch((void *)from, (void *)to);
+  from->state_of_uthread = RUNNING;
+  queue_enqueue(running, to);
 
 }
 
@@ -55,7 +59,7 @@ int uthread_create(uthread_func_t func, void *arg)
     block = queue_create();
     zombie = queue_create();
   }
-  Thread *newThread = (struct newThread*)malloc(sizeof(struct Thread));
+  struct Thread *newThread = (struct Thread*)malloc(sizeof(struct Thread));
   if(newThread == NULL){
     return -1;
   }
