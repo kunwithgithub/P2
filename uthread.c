@@ -14,37 +14,33 @@
 /* TODO Phase 2 */
 #define STACK_SIZE 32768
 
-enum state{ready,running,block,zombie};
+enum state{READY,RUNNING,BLOCK,ZOMBIE};
 
-;//static ucontext_t ctx;
 
-struct newThread{
-  int TID; 
+static uthread_t TID;
+static queue_t ready, running, block, zombie;
+
+struct Thread{
+  uthread_t tid;
   void *stackPtr;
   enum state state_of_uthread;
   char stack[STACK_SIZE];
   ucontext_t ctx;
 };
 
-static void threat(int x)
-{
-
-}
-
-
-
-
-
-
-
 void uthread_yield(void)
 {
 	/* TODO Phase 2 */
+  void **data;
+  queue_dequeue(running,data);
+  queue_enqueue(ready,data);
+
 }
 
 uthread_t uthread_self(void)
 {
 	/* TODO Phase 2 */
+
   
 
 }
@@ -53,8 +49,27 @@ int uthread_create(uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
   
-
+  if(TID == 1){
+    ready = queue_create();
+    running = queue_create();
+    block = queue_create();
+    zombie = queue_create();
+  }
+  Thread *newThread = (struct newThread*)malloc(sizeof(struct Thread));
+  if(newThread == NULL){
+    return -1;
+  }
+  newThread->stackPtr = NULL;
+  newThread->state_of_uthread = READY;
+  newThread->tid = TID;
+  newThread->ctx = NULL;
   
+
+  int ctxInitializationSuccess = uthread_ctx_init(newThread->ctx, newThread->stackPtr, func, arg);
+
+  queue_enqueue(ready, newThread);
+  TID++;
+  return newThread->tid;
 }
 
 void uthread_exit(int retval)
