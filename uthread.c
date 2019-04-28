@@ -90,6 +90,16 @@ int uthread_create(uthread_func_t func, void *arg)
 void uthread_exit(int retval)
 {
 	/* TODO Phase 2 */
+  /*if(currentRunningThread->state_of_uthread == ZOMBIE){
+    uthread_ctx_destroy_stack(currentRunningThread->stackPtr);
+  }*/
+  if(retval > 0){
+    uthread_ctx_destroy_stack(currentRunningThread->stackPtr);
+    free(currentRunningThread);
+  }else{
+    queue_enqueue(zombie,(void *)currentRunningThread);
+  }
+
 }
 
 int uthread_join(uthread_t tid, int *retval)
