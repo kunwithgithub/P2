@@ -30,7 +30,7 @@ struct Thread{
   ucontext_t ctx;
 };
 
-Thread *currentRunningThread;
+struct Thread *currentRunningThread;
 
 void uthread_yield(void)
 {
@@ -59,7 +59,7 @@ uthread_t uthread_self(void)
   currentRunningThread = to;
 //  queue_enqueue(running, to);
   }
-  return currentThread->tid;
+  return currentRunningThread->tid;
 }
 
 int uthread_create(uthread_func_t func, void *arg)
@@ -78,7 +78,6 @@ int uthread_create(uthread_func_t func, void *arg)
   newThread->stackPtr = uthread_ctx_alloc_stack();
   newThread->state_of_uthread = READY;
   newThread->tid = TID;
-  newThread->ctx;
 //newThread->ctx = NULL;
 
   int ctxInitializationSuccess = uthread_ctx_init(&(newThread->ctx), newThread->stackPtr, func, arg);
@@ -97,7 +96,7 @@ int uthread_join(uthread_t tid, int *retval)
 {
 	/* TODO Phase 2 */
   if(tid == 0){
-    return -1
+    return -1;
   }
   while(1){
     int length = queue_length(ready);
