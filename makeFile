@@ -1,0 +1,37 @@
+# Target library
+lib := libuthread.a
+objects = queue.o context.o uthread.o, preempt.o
+
+CC := gcc
+CCLAGS := -Wall -Werror
+CCLAGS += -g
+CCKUN := ar rcs
+
+ifneg($(V),1)
+Q = @
+V = 0
+endif
+
+all: $(lib)
+
+deps := $(patsubst %.o, %.d, S(objs))
+-include $(deps)
+DEPFLAG = -MMD -MF $(@:.o=.d)
+
+
+
+
+
+libuthread.a : $(objs)
+	@echo "CCKUN $@"
+        $(Q)$(CCKUN) $@ S^
+
+%.o: %.c
+      @echo "CC $@"
+      $(Q)$(CC) $(CFLAGS) -c -o $@ S< $(DEPFLAGS)
+
+clean:
+	@echo 'clean'
+        $(Q)rm -f $(lib) $(objs) $(deps)
+
+## TODO: Phase 1.1
