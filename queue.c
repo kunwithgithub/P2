@@ -22,7 +22,8 @@ struct queue {
 queue_t queue_create(void)
 {
 	/* TODO Phase 1 */
-  struct queue *myQueue = (struct queue*)malloc(sizeof(struct queue));
+  struct queue *myQueue = 
+malloc(sizeof(struct queue));
 	myQueue->front = NULL;
   myQueue->back = NULL;
 	myQueue->length = 0;
@@ -43,7 +44,7 @@ int queue_destroy(queue_t queue)
 int queue_enqueue(queue_t queue, void *data)
 {
 	/* TODO Phase 1 */
-  struct node *newNode = (struct node*)malloc(sizeof(struct node));
+  struct node *newNode = malloc(sizeof(struct node));
   if(data == NULL||queue == NULL||newNode == NULL){
     return -1;
   }
