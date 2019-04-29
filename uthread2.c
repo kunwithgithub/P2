@@ -166,10 +166,7 @@ int uthread_join(uthread_t tid, int *retval)
     a = queue_iterate(ready, find_item, &tid, (void**)&readyed);
   }
   
-  for(int k = 0; k<queue_length(zombie); k++)
-  {
-    c = queue_iterate(zombie, find_item, &tid,(void**)&skull);
-  }
+ 
 
   if(a == 1 || b ==1)
   { 
@@ -186,8 +183,15 @@ int uthread_join(uthread_t tid, int *retval)
     {
       readyed = currentRunningThread;
     }
-
-
+    
+    uthread_yield();
+   
+     for(int k = 0; k<queue_length(zombie); k++)
+    {
+       c = queue_iterate(zombie, find_item, &tid,(void**)&skull);
+    }
+    
+    
     if(c==1 && a==1)
     {  
       queue_enqueue(block, (void*)&join);
@@ -210,13 +214,26 @@ int uthread_join(uthread_t tid, int *retval)
   
   }
 
-  else if(c==1)
-  {
-    join = currentRunningThread;
-    join->value=V;
+  else 
+  { 
+      for(int k = 0; k<queue_length(zombie); k++)
+    {
+       c = queue_iterate(zombie, find_item, &tid,(void**)&skull);
+    }
     
-    *retval = join->value;
-    return *retval;
-  }
+    if(c==1)
+    {
+      join = currentRunningThread;
+      join->value=V;
+    
+      *retval = join->value;
+      return *retval;
+    }
+    
+    uthread_yield();
 
+  }
+  
+  
+  
 }
