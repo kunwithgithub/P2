@@ -18,6 +18,7 @@ enum state{READY,RUNNING,BLOCK,ZOMBIE};
 
 
 uthread_t TID;
+int V = 5; 
 
 queue_t ready, block, zombie;
 //queue_t running
@@ -26,31 +27,49 @@ struct Thread{
   uthread_t tid;
   void *stackPtr;
   enum state state_of_uthread;
-
-//char stack[STACK_SIZE];
+  
+  //comment before
+  char stack[STACK_SIZE];
   uthread_ctx_t ctx;
+  uthread_t parent;
+  int willBeCollected;
+  
 };
 
 struct Thread *currentRunningThread;
+
+ int find_item(void *data, void *arg)
+{
+    uthread_t tid = (*(uthread_t*)arg);
+    
+    if (tid == ((struct Thread*)data)->tid)
+    {
+        //printf("match\n");
+        return 1;
+    }
+
+    return 0;
+}
+
 
 void uthread_yield(void)
 {
 	/* TODO Phase 2 */
  
-  queue_enqueue(ready, (void *)currentRunningThread); 
+  queue_enqueue(ready, currentRunningThread); 
   struct Thread *from;
   struct Thread *to;
   from = currentRunningThread;
   queue_dequeue(ready, (void**)&to);
   currentRunningThread = to;
   uthread_ctx_switch(&(from->ctx), &(currentRunningThread->ctx));
+  currentRunningThread->state_of_uthread=RUNNING;
 
 }
 
 uthread_t uthread_self(void)
 {
 	/* TODO Phase 2 */
-  
   return currentRunningThread->tid;
 }
 
@@ -74,6 +93,10 @@ int uthread_create(uthread_func_t func, void *arg)
   }
   
   struct Thread *newThread = malloc(sizeof(struct Thread));
+  
+  
+  //have to do someting
+  
   if(newThread == NULL){
     return -1;
 
@@ -97,16 +120,28 @@ int uthread_create(uthread_func_t func, void *arg)
 void uthread_exit(int retval)
 {
 	/* TODO Phase 2 */
+  /*
 	struct Thread *temp = currentRunningThread;
 	queue_enqueue(zombie,temp);
 	uthread_yield();
 	temp->state_of_uthread = ZOMBIE;
-
+  */
+  struct Thread *unblocking;
+  queue_iterate(block, find_item, (void *)&(currentRunningThread->parent), (void **)&unblocking);
+  unblocking->state_of_uthread = READY;
+  queue_delete(block, (void *)unblocking);
+  queue_enqueue(ready,(void *)unblocking);
+  currentRunningThread->state_of_uthread = ZOMBIE;
+  queue_enqueue(zombie,(void*)currentRunningThread);
+  
 }
+
 
 int uthread_join(uthread_t tid, int *retval)
 {
 	/* TODO Phase 2 */
+  /*
+  
   if(tid == 0){
     return -1;
   }
@@ -120,5 +155,55 @@ int uthread_join(uthread_t tid, int *retval)
  
   }
   return 0;
+  */
 	/* TODO Phase 3 */
+  int isInBlocked = 0;
+  int isInReady = 0;
+  int isInZombie = 0;
+
+  struct Thread *join;
+  struct Thread *blocked;
+  struct Thread *zombied;
+  struct Thread *readied;
+  struct Thread *parent;
+
+
+
+  isInReady = queue_iterate(ready, find_item, (void *)&tid, (void **)&readied);
+
+  isInBlocked = queue_iterate(block, find_item,(void *)&tid, (void **)&blocked);
+
+  isInZombie = queue_iterate(zombie,find_item, (void *)&tid, (void **)&zombied);
+
+  if(isInReady == 1){
+    readied->parent = currentRunningThread->tid;
+    currentRunningThread->state_of_uthread = BLOCK;
+    queue_enqueue(block, (void *)currentRunningThread);
+    blocked = currentRunningThread;
+    queue_dequeue(ready,(void **)&currentRunningThread);
+    uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
+
+
+  }else if(isInZombie == 1){
+
+    zombied->willBeCollected = *retval;
+    return *retval;
+
+  }else if(isInBlocked == 1){
+    blocked->tid = currentRunningThread->tid;
+    currentRunningThread->state_of_uthread = BLOCK;
+    queue_enqueue(block, (void *)currentRunningThread);
+    blocked = currentRunningThread;
+    queue_dequeue(ready,(void **)&currentRunningThread);
+    uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
+
+
+  }else{
+    return -1;
+  }
+
+
+  
+  
+  
 }
