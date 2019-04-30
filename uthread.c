@@ -41,10 +41,11 @@ struct Thread *currentRunningThread;
  int find_item(void *data, void *arg)
 {
     uthread_t tid = (*(uthread_t*)arg);
-    
-    if (tid == ((struct Thread*)data)->tid)
-    {
-        //printf("match\n");
+    //printf("tid we looking for is %d \n",tid);
+    uthread_t dataTid = ((struct Thread*)data)->tid;
+    if (tid == dataTid)
+    { 
+   //     printf("struct tid is %d\n",dataTid);
         return 1;
     }
 
@@ -76,7 +77,7 @@ uthread_t uthread_self(void)
 int uthread_create(uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
-  printf("create begin\n");
+ // printf("create begin\n");
  struct Thread *mainThread = malloc(sizeof(struct Thread));
   if(TID == 0){
     ready = queue_create();
@@ -127,12 +128,16 @@ void uthread_exit(int retval)
 	temp->state_of_uthread = ZOMBIE;
   */
   struct Thread *unblocking;
-  queue_iterate(block, find_item, (void *)&(currentRunningThread->parent), (void **)&unblocking);
+  struct Thread *temp = currentRunningThread;
+ 
+  uthread_yield();
+   queue_enqueue(zombie,(void*)temp);
+  queue_iterate(block, find_item, (void *)&(temp->parent), (void **)&unblocking);
   unblocking->state_of_uthread = READY;
   queue_delete(block, (void *)unblocking);
   queue_enqueue(ready,(void *)unblocking);
-  currentRunningThread->state_of_uthread = ZOMBIE;
-  queue_enqueue(zombie,(void*)currentRunningThread);
+  temp->state_of_uthread = ZOMBIE;
+ 
   
 }
 
@@ -167,10 +172,11 @@ int uthread_join(uthread_t tid, int *retval)
   struct Thread *readied;
   struct Thread *parent;
 
-
+ // uthread_t testTID = 0;
 
   isInReady = queue_iterate(ready, find_item, (void *)&tid, (void **)&readied);
-
+ // printf("isready is : %d\n",isInReady);
+ // printf("ready length is %d\n",queue_length(ready));
   isInBlocked = queue_iterate(block, find_item,(void *)&tid, (void **)&blocked);
 
   isInZombie = queue_iterate(zombie,find_item, (void *)&tid, (void **)&zombied);
