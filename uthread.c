@@ -85,7 +85,6 @@ int uthread_create(uthread_func_t func, void *arg)
     zombie = queue_create();
    
 	mainThread->tid = TID;
-  mainThread->child = TID+1;
     mainThread->state_of_uthread = RUNNING;
     currentRunningThread = mainThread;
     currentRunningThread->stackPtr = uthread_ctx_alloc_stack();
@@ -105,7 +104,6 @@ int uthread_create(uthread_func_t func, void *arg)
   newThread->stackPtr = uthread_ctx_alloc_stack();
   newThread->state_of_uthread = READY;
   newThread->tid = TID;
-  newThread->child =TID+1;
  
 //newThread->ctx = NULL;
 
@@ -171,6 +169,7 @@ int uthread_join(uthread_t tid, int *retval)
   return 0;
   */
 	/* TODO Phase 3 */
+
    if(tid == 0 || tid == currentRunningThread->tid){
     
     return -1;
@@ -190,7 +189,7 @@ int uthread_join(uthread_t tid, int *retval)
 
 
   isInReady = queue_iterate(ready, find_item, (void *)&tid, (void **)&readied);
-
+  
 
   isInBlocked = queue_iterate(block, find_item,(void *)&tid, (void **)&blocked);
 
@@ -210,13 +209,13 @@ int uthread_join(uthread_t tid, int *retval)
   
   if(isInReady == 1){
   
-
     readied->parent = currentRunningThread->tid;
     currentRunningThread->state_of_uthread = BLOCK;
     queue_enqueue(block, (void *)currentRunningThread);
     blocked = currentRunningThread;
-    queue_dequeue(ready,(void **)&currentRunningThread);
     
+    queue_dequeue(ready,(void **)&currentRunningThread);
+    blocked->child = currentRunningThread->tid;
     uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
    
 
@@ -256,7 +255,7 @@ int uthread_join(uthread_t tid, int *retval)
     uthread_t deleted = child->tid;
     
   
-
+    printf("child is %d \n",currentRunningThread->child);
     queue_delete(zombie, (void *)child);
 
 
