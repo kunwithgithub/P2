@@ -66,8 +66,24 @@ Phase Three
 we create a new function named **find_item()** and use *queue_iterate()* to find the
 tid of child thread if is inside the *ready queue*,*block queue*,and *zombie queue*.
 If the child is inside the *ready queue* or *block queue*, we use a new valuable in 
-the **struct** named *parent* to hold the tid of parent thread. 
-
-
+the **struct** named *parent* to hold the tid of parent thread. After that, we change
+the the state of parent(here is *currentRunningThread*) to be block and  *enqueue*
+into the *block queue*. Next, we use *dequeue* to take out the child thread from
+*ready queue* or *block queue* and make it to be *currentRunningThread*. We use a 
+new valuable in **struct** name *child* to hold the tid of the child.Finally, we
+use *uthread_ctx_switch()* to be running. 
+  When the child thread is dead, we unblock the parent thread. We do this inside 
+the **uthread_exit()**. First, we use a new valuable in **struct** named 
+*returnValue* the hold the *retval*. Next, we use *queue_iterate()* 
+check if the parent thread inside the *block queue*. If it exist, we use 
+*queue_delete()*to delete it in the *block queue* and change its state to be *raady* 
+and *enqueue* it to the *ready queue*. Inside **uthread_exit()**, we also need to 
+change the state of child thread(here is *currentRunningThread*) to be *zombie* and 
+*enqueue* it into *zombie queue*.Finally, we use *yield()* to next 
+thread inside the *ready queue* to be runned. 
+  When the parent thread which is inside the *ready queue* is running again. It will
+ collect the child thread. In this part, we use *queue_iterate()* to check the tid 
+ of child thread if in the *zombie queue*. If it is yes, we use *queue_delete()* to 
+ delete it inside the *zombie queue* and use *uthread_ctx_destroy_stack()* free it.
 
 
