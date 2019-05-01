@@ -8,7 +8,7 @@ under supervision and guidance of professor, Joel Porquet.
 
 Phase One
     
-    In this Phase, the main goal is to implement a simple FIFO
+  In this Phase, the main goal is to implement a simple FIFO
 queue according to the API documentation in *queue.h*. 
 We implemented the queue with the idea of *linked-list* 
 and two *structs* (The struct **node** contains a pointer
