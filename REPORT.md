@@ -61,6 +61,12 @@ Otherwise, we *yield* it. Inside the **uthread_exit()**, it also simple. We just
 enqueue *currentRuningThread* into *zombie queue* and *yield* it and change its 
 state to be *zombie*.
 
+Phase Three
+   In this phase, we have to implement a thread can join another thread. In first step,
+we create a new function named **find_item()** and use *queue_iterate()* to find the
+tid of child thread if is inside the *ready queue*,*block queue*,and *zombie queue*.
+If the child is inside the *ready queue* or *block queue*, we use a new valuable in 
+the **struct** named *parent* to hold the tid of parent thread. 
 
 
 
