@@ -30,7 +30,7 @@ the function that is passed into the function; for *queue_length*,
 we return the length stored in the struct **queue**.
 
 
-reference: suggestions given by tutor Bendam.
+reference: suggestions given by tutor Brendan Gerrity.
 
 Phase Two
    
@@ -89,4 +89,4 @@ thread inside the *ready queue* to be runned.
  of child thread if in the *zombie queue*. If it is yes, we use *queue_delete()* to 
  delete it inside the *zombie queue* and use *uthread_ctx_destroy_stack()* free it.
 
-
+reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
