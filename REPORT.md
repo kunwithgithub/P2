@@ -6,7 +6,7 @@ under supervision and guidance of professor, Joel Porquet.
 
 ##Processing
 
-Phase One
+##Phase One
 In this Phase, the main goal is to implement a simple FIFO
 queue according to the API documentation in *queue.h*. 
 We implemented the queue with the idea of *linked-list* 
@@ -31,7 +31,7 @@ we return the length stored in the struct **queue**.
 
 reference: suggestions given by tutor Bendam.
 
-Phase Two
+##Phase Two
    In this Phase, the goal is creating treads and make them can be
 runned,be joined,and be exited. 
    First, we create a **struct** to simulate a TCB and global value to 
@@ -61,7 +61,7 @@ Otherwise, we *yield* it. Inside the **uthread_exit()**, it also simple. We just
 enqueue *currentRuningThread* into *zombie queue* and *yield* it and change its 
 state to be *zombie*.
 
-Phase Three
+##Phase Three
    In this phase, we have to implement a thread can join another thread. In first step,
 we create a new function named **find_item()** and use *queue_iterate()* to find the
 tid of child thread if is inside the *ready queue*,*block queue*,and *zombie queue*.
