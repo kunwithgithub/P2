@@ -63,7 +63,7 @@ of the thread which is *dequeue* from *ready queue*. After that, we use function
 *uthread_ctx_switch()* to make */to/* become *currentRunningThread*. (*swapcontext()*
 inside *uthread_ctx_switch()* has this function.)
 
-4.The main goal of this phase is testing if implementing **uthread_yield()** and 
+4. The main goal of this phase is testing if implementing **uthread_yield()** and 
 **uthread_create()** correctly, so in the **uthread_join()**, we just use a 
 infinite loop to check the length of *ready queue*. If it is 0, we break the loop.
 Otherwise, we *yield* it. Inside the **uthread_exit()**, it also simple. We just
@@ -99,5 +99,11 @@ thread inside the *ready queue* to be runned.
 collect the child thread. In this part, we use *queue_iterate()* to check the tid 
 of child thread if in the *zombie queue*. If it is yes, we use *queue_delete()* to 
 delete it inside the *zombie queue* and use *uthread_ctx_destroy_stack()* free it.
+Finally, the parent thread get the return value of dead child.
+
+4. In the the case of the child thread is already dead when the parent thread joins the child
+The parent thread have to collect the child thread right away. The process is similar with 
+*point 3*.
+
 
 reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
