@@ -255,12 +255,109 @@ int uthread_join(uthread_t tid, int *retval)
     
     uthread_t deleted = child->tid;
     
-    printf("line 258 \n");
+  
 
     queue_delete(zombie, (void *)child);
 
 
- printf("line 253 \n");
+
     uthread_ctx_destroy_stack(child->stackPtr);
+
     return 0;
-}
+}#include <assert.h>
+2
+#include <signal.h>
+3
+#include <stddef.h>
+4
+#include <stdint.h>
+5
+#include <stdio.h>
+6
+#include <stdlib.h>
+7
+#include <sys/time.h>
+8
+#include <ucontext.h>
+9
+#include "context.h"
+10
+#include "preempt.h"
+11
+#include "queue.h"
+12
+#include "uthread.h"
+13
+​
+14
+/* TODO Phase 2 */
+15
+#define STACK_SIZE 32768
+16
+​
+17
+enum state{READY,RUNNING,BLOCK,ZOMBIE};
+18
+​
+19
+​
+20
+uthread_t TID;
+21
+int V = 5; 
+22
+​
+23
+queue_t ready, block, zombie;
+24
+//queue_t running
+25
+​
+26
+struct Thread{
+27
+  uthread_t tid;
+28
+  void *stackPtr;
+29
+  enum state state_of_uthread;
+30
+  
+31
+  //comment before
+32
+  char stack[STACK_SIZE];
+33
+  uthread_ctx_t ctx;
+34
+  uthread_t parent;
+35
+  uthread_t child;
+36
+  int willBeCollected;
+37
+  
+38
+};
+39
+​
+40
+struct Thread *currentRunningThread;
+41
+​
+42
+ int find_item(void *data, void *arg)
+43
+{
+44
+    uthread_t tid = (*(uthread_t*)arg);
+45
+  
+46
+    if (tid == ((struct Thread*)data)->tid)
+47
+    {
+48
+        //printf("match\n");
+49
+        return 1;
