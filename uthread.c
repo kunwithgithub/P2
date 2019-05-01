@@ -216,6 +216,7 @@ int uthread_join(uthread_t tid, int *retval)
     
     queue_dequeue(ready,(void **)&currentRunningThread);
     blocked->child = currentRunningThread->tid;
+    currentRunningThread->state_of_uthread = RUNNING;
     uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
    
 
@@ -234,6 +235,8 @@ int uthread_join(uthread_t tid, int *retval)
     queue_enqueue(block, (void *)currentRunningThread);
     blocked = currentRunningThread;
     queue_dequeue(ready,(void **)&currentRunningThread);
+    blocked->child = currentRunningThread->tid;
+    currentRunningThread->state_of_uthread = RUNNING;
     uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
 
   }
