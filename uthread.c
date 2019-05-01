@@ -32,6 +32,7 @@ struct Thread{
   char stack[STACK_SIZE];
   uthread_ctx_t ctx;
   uthread_t parent;
+  uthread_t child;
   int willBeCollected;
   
 };
@@ -41,11 +42,10 @@ struct Thread *currentRunningThread;
  int find_item(void *data, void *arg)
 {
     uthread_t tid = (*(uthread_t*)arg);
-    //printf("tid we looking for is %d \n",tid);
-    uthread_t dataTid = ((struct Thread*)data)->tid;
-    if (tid == dataTid)
-    { 
-   //     printf("struct tid is %d\n",dataTid);
+  
+    if (tid == ((struct Thread*)data)->tid)
+    {
+        //printf("match\n");
         return 1;
     }
 
@@ -77,7 +77,6 @@ uthread_t uthread_self(void)
 int uthread_create(uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
- // printf("create begin\n");
  struct Thread *mainThread = malloc(sizeof(struct Thread));
   if(TID == 0){
     ready = queue_create();
@@ -86,6 +85,7 @@ int uthread_create(uthread_func_t func, void *arg)
     zombie = queue_create();
    
 	mainThread->tid = TID;
+  mainThread->child = TID+1;
     mainThread->state_of_uthread = RUNNING;
     currentRunningThread = mainThread;
     currentRunningThread->stackPtr = uthread_ctx_alloc_stack();
@@ -105,6 +105,7 @@ int uthread_create(uthread_func_t func, void *arg)
   newThread->stackPtr = uthread_ctx_alloc_stack();
   newThread->state_of_uthread = READY;
   newThread->tid = TID;
+  newThread->child =TID+1;
  
 //newThread->ctx = NULL;
 
@@ -127,17 +128,25 @@ void uthread_exit(int retval)
 	uthread_yield();
 	temp->state_of_uthread = ZOMBIE;
   */
+  
+  int d = 0;
   struct Thread *unblocking;
-  struct Thread *temp = currentRunningThread;
+  currentRunningThread->willBeCollected = retval;
+  //
  
-  uthread_yield();
-   queue_enqueue(zombie,(void*)temp);
-  queue_iterate(block, find_item, (void *)&(temp->parent), (void **)&unblocking);
+ d = queue_iterate(block, find_item, (void *)&(currentRunningThread->parent), (void **)&unblocking);
+
+
+ if(d==1)
+ {
   unblocking->state_of_uthread = READY;
   queue_delete(block, (void *)unblocking);
   queue_enqueue(ready,(void *)unblocking);
-  temp->state_of_uthread = ZOMBIE;
- 
+ }
+  
+  currentRunningThread->state_of_uthread = ZOMBIE;
+  queue_enqueue(zombie,(void*)currentRunningThread);
+  uthread_yield();
   
 }
 
@@ -162,37 +171,62 @@ int uthread_join(uthread_t tid, int *retval)
   return 0;
   */
 	/* TODO Phase 3 */
+   if(tid == 0 || tid == currentRunningThread->tid){
+    
+    return -1;
+  }
+
   int isInBlocked = 0;
   int isInReady = 0;
   int isInZombie = 0;
 
-  struct Thread *join;
+
   struct Thread *blocked;
   struct Thread *zombied;
   struct Thread *readied;
-  struct Thread *parent;
+  //struct Thread *free;
+  struct Thread *child;
+//  struct Thread *parent;
 
- // uthread_t testTID = 0;
 
   isInReady = queue_iterate(ready, find_item, (void *)&tid, (void **)&readied);
- // printf("isready is : %d\n",isInReady);
- // printf("ready length is %d\n",queue_length(ready));
+
+
   isInBlocked = queue_iterate(block, find_item,(void *)&tid, (void **)&blocked);
 
-  isInZombie = queue_iterate(zombie,find_item, (void *)&tid, (void **)&zombied);
+ 
 
+  isInZombie = queue_iterate(zombie,find_item, (void *)&tid, (void **)&zombied);
+  
+  if(isInReady == 0 && isInBlocked ==0 && isInZombie ==0){
+    
+
+    return -1;
+  }
+
+ 
+
+
+  
   if(isInReady == 1){
+  
+
     readied->parent = currentRunningThread->tid;
     currentRunningThread->state_of_uthread = BLOCK;
     queue_enqueue(block, (void *)currentRunningThread);
     blocked = currentRunningThread;
     queue_dequeue(ready,(void **)&currentRunningThread);
+    
     uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
+   
 
-
-  }else if(isInZombie == 1){
+    //uthread_exit(5);
+   
+   }else if(isInZombie == 1){
 
     zombied->willBeCollected = *retval;
+
+
     return *retval;
 
   }else if(isInBlocked == 1){
@@ -203,13 +237,31 @@ int uthread_join(uthread_t tid, int *retval)
     queue_dequeue(ready,(void **)&currentRunningThread);
     uthread_ctx_switch(&(blocked->ctx),&(currentRunningThread->ctx));
 
-
-  }else{
-    return -1;
   }
 
+   //collect
+   //get return value of zombie queue, and free
+    printf("dddc\n");
+  
+    
+    
 
+   //parent->willBeCollected = *retval;
   
+    int success = queue_iterate(zombie, find_item, (void *)&currentRunningThread->child, (void **)&child);
+
+    printf("child is %d found\n",success);
+
+    
+    uthread_t deleted = child->tid;
+    
   
-  
+
+    queue_delete(zombie, (void *)child);
+
+
+
+    uthread_ctx_destroy_stack(child->stackPtr);
+
+    return 0;
 }
