@@ -165,7 +165,7 @@ void test_iterator(void)
 
 }
 
-void test_enqueueAndDequeue(void){
+void test_generalTest(void){
  
   queue_t q;
   int *ptr;
@@ -250,6 +250,6 @@ int main()
 {
   //test_create();
   test_iterator();
-  test_enqueueAndDequeue();
+  test_generalTest();
 
 }
