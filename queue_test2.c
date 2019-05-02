@@ -153,6 +153,13 @@ void test_iterator(void)
     assert(data[3] == 18);
     printf("pass!\n");
 
+    printf("-----------------------------------\n");
+    printf("Test delete\n");
+    printf("Test the third item\n");
+    queue_delete(q, &data[2]);
+    queue_iterate(q, print_item, NULL,NULL);
+
+
     printf("---------finish testing---------\n");
 
 
