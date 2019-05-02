@@ -45,13 +45,13 @@ runned,be joined,and be exited.
 hold *currentRunningThread* .
    
 2. For creating tread,we divide it into two parts. The first part is 
-creating a main tread when tid equal to 0. In this part, we use *queue_create()*
+creating a main tread when tid equal to 0. In this part, we use **queue_create()**
 creating three **queue** for holding the threads whose states are *ready*, 
 *block*,and *zombie*. Next step, we change its state to be *running* and 
 make it to be *currentRunningThread*.Finally, increasing the tid. The second 
 part is creating normal thread when tid > 0. In this part, we use some functions
-inside **context.c**.For example, we use *uthread_ctx_alloc_stack()* to allcocate 
-memory to stack pointer.and use *uthread_ctx_init()* to initialize the context 
+inside **context.c**.For example, we use **uthread_ctx_alloc_stack()** to allcocate 
+memory to stack pointer.and use **uthread_ctx_init()** to initialize the context 
 inside the thread. Next, we set the thread to be *ready* and use *queue_enqueue* 
 to put the thread inside the *ready queue*. Finally, increase the tid and return
 it.
@@ -61,8 +61,8 @@ thread which in the *ready queue* to be runned.In this part, we use
 *strcut *Thread from* to hold the *currentRunningThread* which is *enqueue* into
 *ready queue*. On the other hand, we use *struct *Thread to* to hold the address 
 of the thread which is *dequeue* from *ready queue*. After that, we use function
-*uthread_ctx_switch()* to make */to/* become *currentRunningThread*. (*swapcontext()*
-inside *uthread_ctx_switch()* has this function.)
+**uthread_ctx_switch()** to make */to/* become *currentRunningThread*. (**swapcontext()**
+inside **uthread_ctx_switch()** has this function.)
 
 4. The main goal of this phase is testing if implementing **uthread_yield()** and 
 **uthread_create()** correctly, so in the **uthread_join()**, we just use a 
@@ -76,7 +76,7 @@ state to be *zombie*.
    
 In this phase, we have to implement a thread can join another thread. 
 
-1. In first step,we create a new function named **find_item()** and use *queue_iterate()*
+1. In first step, we create a new function named **find_item()** and use *queue_iterate()*
 to find the tid of child thread if is inside the *ready queue*,*block queue*,and 
 *zombie queue*.If the child is inside the *ready queue* or *block queue*, we 
 use a new valuable in the **struct** named *parent* to hold the tid of parent thread. 
@@ -84,22 +84,22 @@ After that, we change the the state of parent(here is *currentRunningThread*) to
 block and  *enqueue* into the *block queue*. Next, we use *dequeue* to take out the 
 child thread from *ready queue* or *block queue* and make it to be *currentRunningThread*.
 We use a new valuable in **struct** name *child* to hold the tid of the child.Finally, we
-use *uthread_ctx_switch()* to be running. 
+use **uthread_ctx_switch()** to be running. 
 
 2. When the child thread is dead, we unblock the parent thread. We do this inside 
 the **uthread_exit()**. First, we use a new valuable in **struct** named 
-*returnValue* the hold the *retval*. Next, we use *queue_iterate()* 
+*returnValue* the hold the *retval*. Next, we use **queue_iterate()** 
 check if the parent thread inside the *block queue*. If it exist, we use 
-*queue_delete()*to delete it in the *block queue* and change its state to be *raady* 
+**queue_delete()** to delete it in the *block queue* and change its state to be *ready* 
 and *enqueue* it to the *ready queue*. Inside **uthread_exit()**, we also need to 
 change the state of child thread(here is *currentRunningThread*) to be *zombie* and 
-*enqueue* it into *zombie queue*.Finally, we use *yield()* to next 
+*enqueue* it into *zombie queue*.Finally, we use **yield()** to next 
 thread inside the *ready queue* to be runned. 
 
 3. When the parent thread which is inside the *ready queue* is running again. It will
-collect the child thread. In this part, we use *queue_iterate()* to check the tid 
-of child thread if in the *zombie queue*. If it is yes, we use *queue_delete()* to 
-delete it inside the *zombie queue* and use *uthread_ctx_destroy_stack()* free it.
+collect the child thread. In this part, we use **queue_iterate()** to check the tid 
+of child thread if in the *zombie queue*. If it is yes, we use **queue_delete()** to 
+delete it inside the *zombie queue* and use **uthread_ctx_destroy_stack()** free it.
 Finally, the parent thread get the return value of dead child.
 
 4. In the the case of the child thread is already dead when the parent thread joins the child
@@ -114,13 +114,13 @@ reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
 In this phase, we have to kick out the running thread which have to spend a long time and let 
 the next thread inside the *ready queue* which spend shorter time to be runned. 
 
-1. For timer_handler, we put the function uthread_yield() there in order to **yield** 
+1. For **timer_handler**, we put the function **uthread_yield()** there in order to **yield** 
 when we need to kick out the time-wasting or time-expiring thread and start the next thread.
 
-2. For preempt_start, we need two **struct**, **sigaction**, **itimerval**, and set the timer
+2. For **preempt_start**, we need two **struct**, **sigaction**, **itimerval**, and set the timer
 interval 10000, which is the value asked by professor.
 
-3. For preempt_disable and preempt_enable, the key function is use **sigprocmask** from 
+3. For **preempt_disable** and **preempt_enable**, the key function is use **sigprocmask** from 
 GNUC library with the flag *SIG_UNBLOCK* for enable and *SIG_BLOCK* for disable.
 
 reference: Brenden, http://www.informit.com/articles/article.aspx?p=23618&seqNum=14,
