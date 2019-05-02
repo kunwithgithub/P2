@@ -111,4 +111,7 @@ reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
 
 Phase Four
 
-In this phase, 
+In this phase, we have to kick out the running thread which have to spend a long time and let 
+the next thread inside the *ready queue* which spend shorter time to be runned. 
+
+1. 
