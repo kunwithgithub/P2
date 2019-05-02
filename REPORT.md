@@ -36,6 +36,7 @@ we return the length stored in the struct **queue**.
 
 reference: suggestions given by tutor Brendan Gerrity.
 
+
 Phase Two
    
    In this Phase, the goal is creating treads and make them can be
@@ -105,5 +106,9 @@ Finally, the parent thread get the return value of dead child.
 The parent thread have to collect the child thread right away. The process is similar with 
 *point 3*.
 
-
 reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
+
+
+Phase Four
+
+In this phase, 
