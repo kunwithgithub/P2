@@ -6,7 +6,7 @@ under supervision and guidance of professor, Joel Porquet.
 
 ##Processing
 
-Phase One
+###Phase One
     
 In this Phase, the main goal is to implement a simple FIFO
 queue according to the API documentation in *queue.h*. 
@@ -25,8 +25,8 @@ new **back**, and increment the **length**; for *queue_dequeue*,
 we make current **front**'s next to be the new **front** and 
 disconnect current **front** from the queue;
 
-3. For *queue_delete*, we iterate through the queue until the targeted node is found as 
-cursor pointed node's next, then disconnect it from queue by 
+3. For *queue_delete*, we iterate through the queue until the targeted node
+is found as cursor pointed node's next, then disconnect it from queue by 
 connect the cursor pointed node to the targeted node's **next**;
 
 4. For *queue_iterate*, we iterate through the queue and keep calling
@@ -37,7 +37,7 @@ we return the length stored in the struct **queue**.
 reference: suggestions given by tutor Brendan Gerrity.
 
 
-Phase Two
+###Phase Two
    
    In this Phase, the goal is creating treads and make them can be
 runned,be joined,and be exited. 
@@ -72,11 +72,11 @@ enqueue *currentRuningThread* into *zombie queue* and *yield* it and change its
 state to be *zombie*.
 
 
-Phase Three
+###Phase Three
    
 In this phase, we have to implement a thread can join another thread. 
 
-1. In first step,we create a new function named **find_item()** and use *queue_iterate()* 
+1. In first step,we create a new function named **find_item()** and use *queue_iterate()*
 to find the tid of child thread if is inside the *ready queue*,*block queue*,and 
 *zombie queue*.If the child is inside the *ready queue* or *block queue*, we 
 use a new valuable in the **struct** named *parent* to hold the tid of parent thread. 
@@ -109,9 +109,19 @@ The parent thread have to collect the child thread right away. The process is si
 reference: suggestions given by tutor Brendan Gerrity, Sean Young, Shadi Othman.
 
 
-Phase Four
+###Phase Four
 
 In this phase, we have to kick out the running thread which have to spend a long time and let 
 the next thread inside the *ready queue* which spend shorter time to be runned. 
 
-1. 
+1. For timer_handler, we put the function uthread_yield() there in order to **yield** 
+when we need to kick out the time-wasting or time-expiring thread and start the next thread.
+
+2. For preempt_start, we need two **struct**, **sigaction**, **itimerval**, and set the timer
+interval 10000, which is the value asked by professor.
+
+3. For preempt_disable and preempt_enable, the key function is use **sigprocmask** from 
+GNUC library with the flag *SIG_UNBLOCK* for enable and *SIG_BLOCK* for disable.
+
+reference: Brenden, http://www.informit.com/articles/article.aspx?p=23618&seqNum=14,
+, https://www.hacks.moe/posts/1/A_BareBones_UserLevel_Thread_Library
